@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Campus Facilities — Facilica (single-file with localStorage)</title>
+    <style>
+      :root{--teal:#0ea5a4;--blue:#176b86;--card:#e6f6f6;--accent:#03753a}
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;color:#0b2b2d}
+      header{background:#cffff6;padding:22px;display:flex;align-items:center;justify-content:space-between}
+      .brand img{height:78px}
+      .title{flex:1;text-align:center}
+      .title h1{margin:0;font-size:42px;color:#0b6b86;font-weight:800}
+      .title p{margin:6px 0 0;color:#5fb3c1;font-size:18px}
+      .crest img{height:72px;border-radius:50%}
+      main{padding:36px 24px 140px;min-height:calc(100% - 220px)}
+      .panel{background:var(--card);padding:28px;border-radius:6px;max-width:920px;margin:60px auto;display:flex;flex-direction:column;min-height:220px}
+      .steps{display:flex;gap:20px;color:#0b6b86;font-weight:600;margin-bottom:18px;align-items:flex-end}
+      .step{position:relative;padding-bottom:8px;opacity:.6}
+      .step.active{opacity:1}
+      .step.active::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:8px;background:var(--accent);border-radius:6px}
+      .row{display:flex;gap:18px;align-items:flex-start}
+      .col-1{flex:0 0 180px}
+      .col-2{flex:0 0 320px}
+      .flex-1{flex:1}
+      select,input,button{font-family:inherit}
+      #preview-wrap{width:100%;max-width:520px}
+      #preview-img{width:100%;border-radius:6px;box-shadow:0 6px 18px rgba(2,31,37,0.06);display:block}
+      #preview-placeholder{display:flex;align-items:center;justify-content:center;height:180px;border-radius:6px;color:#08333a;font-weight:600;background:transparent}
+      table{border-collapse:collapse}
+      .list-table thead th{background:#eef9f5;color:var(--blue);font-weight:600;padding:10px 14px;text-align:left;font-size:15.5px}
+      .list-table td{padding:10px 14px;color:#134860;font-size:16px;border-top:1px solid rgba(0,0,0,0.03)}
+      .validate-table-wrapper{display:flex;justify-content:center}
+      .validate-table{width:90%;max-width:950px;margin:30px auto;background:white;border:6px solid #53b6be;border-radius:10px;overflow:hidden;box-shadow:0 2px 13px rgba(0,100,91,0.04)}
+      .validate-table th{background:var(--blue);color:white;padding:13px;font-weight:600}
+      .validate-table td{padding:10px;text-align:center;font-size:16px}
+      .validate-avatar{width:28px;height:28px;border-radius:50%;border:1.5px solid #ccc;object-fit:cover}
+      .panel-footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:18px}
+      .btn{min-width:120px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:12px;font-weight:700;border:none;cursor:pointer}
+      .btn-primary{background:#0b6b2f;color:white}
+      .btn.secondary{background:transparent;border:1px solid rgba(0,0,0,0.06);color:#034047}
+      .next-btn{background:#0b6b2f;color:white}
+      .hidden{display:none}
+      @media (max-width:880px){ .row{flex-direction:column} }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><img src="facilica.img.png" alt="Facilica logo"></div>
+      <div class="title"><h1>Campus Facilities</h1><p>Reserve rooms and spaces easily</p></div>
+      <div class="crest"><img src="pcc.img.png" alt="Crest"></div>
+    </header>
+
+    <main>
+      <section class="panel" role="region" aria-label="Reservation panel">
+        <div class="steps">
+          <div class="step active">1. Facility</div>
+          <div class="step">2. Reservation</div>
+          <div class="step">3. Availability</div>
+          <div class="step">4. Details</div>
+          <div class="step">5. Validate</div>
+        </div>
+
+        <div id="step-1">
+          <div class="row">
+            <div class="col-1">
+              <select id="facility-select" aria-label="Select facility">
+                <option value="">Select</option>
+                <option value="Aula Minor">Aula Minor</option>
+                <option value="Crown Jewel">Crown Jewel</option>
+                <option value="Gymnasium">Gymnasium</option>
+              </select>
+            </div>
+
+            <div class="row flex-1" style="align-items:flex-start">
+              <div class="col-2">
+                <div id="preview-wrap">
+                  <img id="preview-img" src="" alt="Preview" style="display:none">
+                  <div id="preview-placeholder">Please select facility</div>
+                </div>
+              </div>
+              <div id="preview-desc" class="flex-1" style="padding-top:6px">
+                <h3 id="desc-title" style="margin:0 0 10px 0"></h3>
+                <p id="desc-text" style="margin:0"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-2" class="hidden" style="margin-top:18px">
+          <div class="row res-fields" style="align-items:center">
+            <input id="res-date" type="date">
+            <input id="res-time-from" type="time">
+            <span style="display:inline-flex;align-items:center;padding:0 6px;color:#0ea5a4;font-weight:700">to</span>
+            <input id="res-time-to" type="time">
+            <input id="res-purpose" type="text" placeholder="Purpose" style="min-width:220px">
+          </div>
+        </div>
+
+        <div id="step-3" class="hidden" style="margin-top:18px;">
+          <div class="row" style="align-items:flex-start;justify-content:flex-start;">
+            <div style="flex:2;">
+              <table class="list-table" style="width:100%;background:white;border:1.5px solid #b5cacc;border-radius:8px;overflow:hidden;">
+                <thead><tr><th>Name</th><th>Location</th><th>Time & Date</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><img src="aula.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Aula Minor</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td>  
+                    <td>Pending</td></tr>
+                  <tr><td><img src="gym.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Gymnasium</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td>
+                    <td>Pending</td></tr>
+                  <tr><td><img src="crown.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Crown Jewel</td><td>Grounds</td><td>October 30, 2025 10:01 a.m</td>
+                    <td>Pending</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="flex:1;">
+              <div style="background:#e6f6f6;padding:18px;border-radius:8px;width:210px;">
+                <div style="font-weight:600;color:#176b86;margin-bottom:8px">Calendar</div>
+                <div style="display:flex;justify-content:center;"><table style="width:100%;text-align:center;border-spacing:3px"><thead><tr style="color:#858aab"><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+                  <th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody><tr><td>5</td><td style="background:#bbedde;font-weight:700">6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr></tbody></table></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-4" class="hidden" style="margin-top:18px;">
+          <div style="display:flex;justify-content:center;gap:32px;margin:30px 0 58px 0;">
+            <input id="details-fullname" type="text" placeholder="Full Name" style="width:230px">
+            <input id="details-course" type="text" placeholder="Course" style="width:230px">
+            <input id="details-email" type="email" placeholder="Email" style="width:230px">
+          </div>
+        </div>
+
+        <div id="step-5" class="hidden" style="margin-top:18px;">
+          <div class="validate-table-wrapper">
+            <table id="validate-table" class="validate-table">
+              <thead><tr><th>Facility</th><th>Name</th><th>Email</th><th>Course</th><th>Time & Date</th><th>Purpose</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td data-key="facility"></td>
+                  <td style="display:flex;align-items:center;gap:8px;justify-content:center"><img id="validate-avatar" class="validate-avatar" src="user1.jpg" alt="avatar"><span id="validate-name" contenteditable="true"></span></td>
+                  <td id="validate-email" contenteditable="true"></td>
+                  <td id="validate-course" contenteditable="true"></td>
+                  <td id="validate-datetime" contenteditable="true"></td>
+                  <td id="validate-purpose" contenteditable="true"></td>
+                  <td id="validate-status" contenteditable="false" style="color:green;font-weight:600">Booked</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <div class="footer-left"><button id="back-btn" class="btn btn-primary">Back</button></div>
+          <div class="footer-right">
+            <div style="display:flex;gap:8px">
+              <button id="confirm-btn" class="btn next-btn" style="display:none">NEXT</button>
+              <button id="next-btn" class="btn next-btn">NEXT</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer style="height:80px;background:#176b86"></footer>
+
+    <script>
+      (function(){
+        const STORAGE_KEY = 'facilica_reservation_v1';
+
+        const facilitySelect = document.getElementById('facility-select');
+        const previewImg = document.getElementById('preview-img');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
+        const descTitle = document.getElementById('desc-title');
+        const descText = document.getElementById('desc-text');
+        const stepEls = Array.from(document.querySelectorAll('.steps .step'));
+        const steps = {
+          1: document.getElementById('step-1'),
+          2: document.getElementById('step-2'),
+          3: document.getElementById('step-3'),
+          4: document.getElementById('step-4'),
+          5: document.getElementById('step-5')
+        };
+        const nextBtn = document.getElementById('next-btn'),
+              backBtn = document.getElementById('back-btn'),
+              confirmBtn = document.getElementById('confirm-btn');
+
+        const resDate = document.getElementById('res-date'),
+              resFrom = document.getElementById('res-time-from'),
+              resTo = document.getElementById('res-time-to'),
+              resPurpose = document.getElementById('res-purpose');
+
+        const detailsFullname = document.getElementById('details-fullname'),
+              detailsCourse = document.getElementById('details-course'),
+              detailsEmail = document.getElementById('details-email');
+
+        const FAC = {
+          'Aula Minor': { img: 'aula.img.jpg', title: 'Aula Minor', text: 'A mid-sized indoor hall suitable for meetings and events.'},
+          'Crown Jewel': { img: 'crown.img.jpg', title: 'Crown Jewel', text: 'A premier multi-purpose hall ideal for ceremonies and seminars.'},
+          'Gymnasium': { img: 'gym.img.jpg', title: 'Gymnasium', text: 'A fully covered gymnasium perfect for sports and assemblies.'}
+        };
+
+        function setPreview(name){
+          const d = FAC[name];
+          if(d && d.img){
+            previewImg.src = d.img; previewImg.style.display='block'; previewPlaceholder.style.display='none';
+          } else { previewImg.style.display='none'; previewPlaceholder.style.display='flex'; }
+          descTitle.textContent = d ? d.title : '';
+          descText.textContent = d ? d.text : '';
+        }
+        facilitySelect.addEventListener('change', ()=> {
+          setPreview(facilitySelect.value);
+          saveDraft();
+        });
+
+        // step control
+        let current = 1;
+        function setStep(n){
+          current = n;
+          Object.keys(steps).forEach(k => steps[k].classList.toggle('hidden', Number(k)!==n));
+          stepEls.forEach((el,idx)=> el.classList.toggle('active', idx+1 <= n));
+          backBtn.style.display = n===1 ? 'none' : 'inline-flex';
+          if(n===2 || n===5){ nextBtn.style.display='none'; confirmBtn.style.display='inline-flex'; confirmBtn.textContent = n===5 ? 'SUBMIT' : 'CONFIRM'; }
+          else { nextBtn.style.display='inline-flex'; confirmBtn.style.display='none'; }
+          if(n===5) populateValidateSummary();
+        }
+
+        function formatDateTime(dateStr, fromStr, toStr){
+          if(!dateStr) return 'N/A';
+          const date = new Date(dateStr);
+          const datePart = date.toLocaleString(undefined,{month:'long',day:'numeric',year:'numeric'});
+          const from = fromStr ? new Date('1970-01-01T'+fromStr+':00').toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+          const to = toStr ? new Date('1970-01-01T'+toStr+':00').toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+          return datePart + (from && to ? ' ' + from + ' - ' + to : '');
+        }
+        function populateValidateSummary(){
+          const facility = facilitySelect.value || 'Aula Minor';
+          const name = detailsFullname.value || 'Jessica Miranda';
+          const email = detailsEmail.value || 'jessica@example.com';
+          const course = detailsCourse.value || 'BSIT';
+          const purpose = resPurpose.value || 'Seminar';
+          const datetime = formatDateTime(resDate.value, resFrom.value, resTo.value);
+          const row = document.querySelector('#validate-table tbody tr');
+          row.querySelector('td[data-key="facility"]').textContent = facility;
+          document.getElementById('validate-name').textContent = name;
+          document.getElementById('validate-email').textContent = email;
+          document.getElementById('validate-course').textContent = course;
+          document.getElementById('validate-datetime').textContent = datetime;
+          document.getElementById('validate-purpose').textContent = purpose;
+          document.getElementById('validate-status').textContent = 'Booked';
+        }
+
+        nextBtn.addEventListener('click', ()=>{
+          if(current===1){ if(!facilitySelect.value){ alert('Please select a facility first'); return; } setStep(2); return; }
+          if(current<5) setStep(current+1);
+        });
+        backBtn.addEventListener('click', ()=> setStep(Math.max(1,current-1)));
+
+        confirmBtn.addEventListener('click', ()=>{
+          if(current===2){
+            if(!resDate.value){ alert('Please select a date'); return; }
+            if(!resFrom.value || !resTo.value){ alert('Please select start and end time'); return; }
+            if(resTo.value <= resFrom.value){ alert('End time must be after start time'); return; }
+            setStep(3);
+          } else if(current===5){
+            // final submit (demo)
+            const r = document.querySelector('#validate-table tbody tr');
+            const facility = r.querySelector('td[data-key="facility"]').textContent;
+            const name = document.getElementById('validate-name').textContent;
+            const email = document.getElementById('validate-email').textContent;
+            const course = document.getElementById('validate-course').textContent;
+            const datetime = document.getElementById('validate-datetime').textContent;
+            const purpose = document.getElementById('validate-purpose').textContent;
+            alert('Submitted!\\n' + [facility,name,email,course,datetime,purpose,'Booked'].join(', '));
+          }
+        });
+
+        // -------- localStorage autosave / load --------
+        function saveDraft(){
+          try{
+            const draft = {
+              facility: facilitySelect.value,
+              resDate: resDate.value,
+              resFrom: resFrom.value,
+              resTo: resTo.value,
+              purpose: resPurpose.value,
+              fullname: detailsFullname.value,
+              course: detailsCourse.value,
+              email: detailsEmail.value
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+            // kept console.log for debugging if you open DevTools
+            console.log('Draft saved to localStorage:', draft);
+          }catch(e){
+            console.warn('Could not save draft', e);
+          }
+        }
+        function loadDraft(){
+          try{
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(!raw) return;
+            const d = JSON.parse(raw);
+            if(d.facility) { facilitySelect.value = d.facility; setPreview(d.facility); }
+            if(d.resDate) resDate.value = d.resDate;
+            if(d.resFrom) resFrom.value = d.resFrom;
+            if(d.resTo) resTo.value = d.resTo;
+            if(d.purpose) resPurpose.value = d.purpose;
+            if(d.fullname) detailsFullname.value = d.fullname;
+            if(d.course) detailsCourse.value = d.course;
+            if(d.email) detailsEmail.value = d.email;
+            console.log('Draft loaded from localStorage:', d);
+          }catch(e){
+            console.warn('Could not load draft', e);
+          }
+        }
+        // Save on input changes
+        [resDate,resFrom,resTo,resPurpose,detailsFullname,detailsCourse,detailsEmail].forEach(el=>{
+          el && el.addEventListener('input', saveDraft);
+        });
+
+        // load draft at init
+        loadDraft();
+
+        // init
+        previewImg.style.display='none';
+        previewPlaceholder.style.display='flex';
+        setStep(1);
+      })();
+    </script>
+  </body>
+</html>
