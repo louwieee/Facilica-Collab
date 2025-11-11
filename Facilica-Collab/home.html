@@ -3,67 +3,46 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Campus Facilities — Facilica</title>
+    <title>Campus Facilities — Facilica (single-file with localStorage)</title>
     <style>
-      :root{--teal:#0ea5a4;--blue:#176b86;--light:#dff7f8;--muted:#e6fbfb;--deep:#0b6b86}
+      :root{--teal:#0ea5a4;--blue:#176b86;--card:#e6f6f6;--accent:#03753a}
+      *{box-sizing:border-box}
       html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;color:#0b2b2d}
-      header{background:#cffff6;padding:26px 22px 18px;display:flex;align-items:center;justify-content:space-between}
+      header{background:#cffff6;padding:22px;display:flex;align-items:center;justify-content:space-between}
       .brand img{height:78px}
       .title{flex:1;text-align:center}
-      .title h1{margin:0;font-size:42px;color:var(--deep);letter-spacing:2px;font-weight:800}
+      .title h1{margin:0;font-size:42px;color:#0b6b86;font-weight:800}
       .title p{margin:6px 0 0;color:#5fb3c1;font-size:18px}
       .crest img{height:72px;border-radius:50%}
-      main{padding:36px 24px 140px;background:white;min-height:calc(100% - 220px)}
-      .panel{background:#e6f6f6;padding:28px 34px;border-radius:4px;max-width:920px;margin:60px auto;min-height:220px;display:flex;flex-direction:column}
-      .steps{display:flex;gap:28px;color:#0b6b86;font-weight:600;margin-bottom:22px;align-items:flex-end}
-      .step{position:relative;padding-bottom:8px;color:#0b6b86;opacity:0.6}
-      .step.active{opacity:1;color:#0b6b86}
-      .step.active::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:8px;background:#03753a;border-radius:6px}
-      #facility-dropdown{display:flex;gap:22px;align-items:flex-start}
-      #facility-menu button{background:white;border:1px solid rgba(0,0,0,0.06);padding:8px 10px;border-radius:6px;text-align:left}
-      #preview-img{width:100%;max-width:520px;border-radius:6px;box-shadow:0 6px 18px rgba(2,31,37,0.06)}
+      main{padding:36px 24px 140px;min-height:calc(100% - 220px)}
+      .panel{background:var(--card);padding:28px;border-radius:6px;max-width:920px;margin:60px auto;display:flex;flex-direction:column;min-height:220px}
+      .steps{display:flex;gap:20px;color:#0b6b86;font-weight:600;margin-bottom:18px;align-items:flex-end}
+      .step{position:relative;padding-bottom:8px;opacity:.6}
+      .step.active{opacity:1}
+      .step.active::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:8px;background:var(--accent);border-radius:6px}
+      .row{display:flex;gap:18px;align-items:flex-start}
+      .col-1{flex:0 0 180px}
+      .col-2{flex:0 0 320px}
+      .flex-1{flex:1}
+      select,input,button{font-family:inherit}
+      #preview-wrap{width:100%;max-width:520px}
+      #preview-img{width:100%;border-radius:6px;box-shadow:0 6px 18px rgba(2,31,37,0.06);display:block}
+      #preview-placeholder{display:flex;align-items:center;justify-content:center;height:180px;border-radius:6px;color:#08333a;font-weight:600;background:transparent}
+      table{border-collapse:collapse}
+      .list-table thead th{background:#eef9f5;color:var(--blue);font-weight:600;padding:10px 14px;text-align:left;font-size:15.5px}
+      .list-table td{padding:10px 14px;color:#134860;font-size:16px;border-top:1px solid rgba(0,0,0,0.03)}
+      .validate-table-wrapper{display:flex;justify-content:center}
+      .validate-table{width:90%;max-width:950px;margin:30px auto;background:white;border:6px solid #53b6be;border-radius:10px;overflow:hidden;box-shadow:0 2px 13px rgba(0,100,91,0.04)}
+      .validate-table th{background:var(--blue);color:white;padding:13px;font-weight:600}
+      .validate-table td{padding:10px;text-align:center;font-size:16px}
+      .validate-avatar{width:28px;height:28px;border-radius:50%;border:1.5px solid #ccc;object-fit:cover}
       .panel-footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:18px}
-      .footer-left, .footer-right{display:flex;gap:10px;align-items:center}
-      .btn{min-width:120px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:12px;font-weight:700;letter-spacing:0.6px;border:none}
-      .btn-primary, .next-btn{background:#0b6b2f;color:white}
+      .btn{min-width:120px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:12px;font-weight:700;border:none;cursor:pointer}
+      .btn-primary{background:#0b6b2f;color:white}
       .btn.secondary{background:transparent;border:1px solid rgba(0,0,0,0.06);color:#034047}
-      .res-fields input{background:white;border-radius:10px;padding:10px 12px;border:none;box-shadow:none;border:1px solid rgba(0,0,0,0.06);min-width:140px}
-      .time-sep{display:inline-flex;align-items:center;color:#0b6b86;font-weight:700;padding:0 6px}
-      footer.sitebar{position:fixed;left:0;right:0;bottom:0;height:80px;background:#176b86}
+      .next-btn{background:#0b6b2f;color:white}
       .hidden{display:none}
-      .validate-table-wrapper {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-      }
-      .validate-table {
-        width: 90%;
-        max-width: 950px;
-        margin: 30px auto 24px auto;
-        background: white;
-        border: 6px solid #53b6be;
-        border-radius: 10px;
-        box-shadow: 0 2px 13px rgba(0,100,91,0.04);
-        overflow: hidden;
-      }
-      .validate-table th {
-        background: #176b86;
-        color: white;
-        font-size: 16px;
-        font-weight: 600;
-        padding: 13px 10px;
-      }
-      .validate-table td {
-        background: white;
-        font-size: 16px;
-        padding: 10px 10px;
-        text-align: center;
-      }
-      .editable[contenteditable="true"] {
-        outline: 1.5px solid #ea8;
-        background: #f4fbe8;
-      }
-      .validate-avatar { width: 28px; height: 28px; border-radius: 50%; border:1.5px solid #ccc; object-fit:cover;}
+      @media (max-width:880px){ .row{flex-direction:column} }
     </style>
   </head>
   <body>
@@ -82,150 +61,85 @@
           <div class="step">4. Details</div>
           <div class="step">5. Validate</div>
         </div>
-       
+
         <div id="step-1">
-          <div id="facility-dropdown" style="display:flex;gap:18px;align-items:flex-start">
-            <div style="flex:0 0 180px">
-              <label for="facility-select" class="hidden" style="position:absolute;left:-9999px">Select facility</label>
-              <select id="facility-select" style="min-width:160px;padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:white">
+          <div class="row">
+            <div class="col-1">
+              <select id="facility-select" aria-label="Select facility">
                 <option value="">Select</option>
                 <option value="Aula Minor">Aula Minor</option>
                 <option value="Crown Jewel">Crown Jewel</option>
                 <option value="Gymnasium">Gymnasium</option>
               </select>
             </div>
-            <div style="flex:1;display:flex;gap:24px;align-items:flex-start">
-              <div style="flex:0 0 320px">
-                <div id="preview-wrap" style="width:100%;max-width:520px;">
-                  <img id="preview-img" src="" alt="Preview" style="display:none;width:100%;height:auto;border-radius:6px;box-shadow:0 6px 18px rgba(2,31,37,0.06)">
-                  <div id="preview-placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;height:180px;background:transparent;color:#08333a;font-weight:600;border-radius:6px">Please select facility</div>
+
+            <div class="row flex-1" style="align-items:flex-start">
+              <div class="col-2">
+                <div id="preview-wrap">
+                  <img id="preview-img" src="" alt="Preview" style="display:none">
+                  <div id="preview-placeholder">Please select facility</div>
                 </div>
               </div>
-              <div id="preview-desc" style="flex:1;color:#08333a;font-size:16px;line-height:1.6;padding-top:6px">
-                <h3 id="desc-title" style="margin:0 0 10px 0;color:#08333a;font-weight:700"></h3>
-                <p id="desc-text" style="margin:0;color:#0b2b2d;opacity:0.9"></p>
+              <div id="preview-desc" class="flex-1" style="padding-top:6px">
+                <h3 id="desc-title" style="margin:0 0 10px 0"></h3>
+                <p id="desc-text" style="margin:0"></p>
               </div>
-            </div>
-          </div>
-        </div>
-       
-        <div id="step-2" class="hidden" style="margin-top:18px">
-          <div class="res-fields" style="display:flex;gap:18px;align-items:center;justify-content:flex-start">
-            <input id="res-date" type="date" placeholder="YYYY-MM-DD">
-            <input id="res-time-from" type="time" placeholder="Time">
-            <span class="time-sep">to</span>
-            <input id="res-time-to" type="time" placeholder="Time">
-            <input id="res-purpose" type="text" placeholder="Purpose" style="min-width:220px">
-          </div>
-        </div>
-     
-        <div id="step-3" class="hidden" style="margin-top:18px;">
-          <div style="display:flex;gap:36px;align-items:flex-start;justify-content:flex-start;">
-            <div style="flex:2;">
-              <table style="width:100%;background:white;border:1.5px solid #b5cacc;border-radius:8px;box-shadow:0 2px 13px rgba(0,60,51,.05);overflow:hidden;">
-                <thead>
-                  <tr style="background:#eef9f5;color:#176b86;font-weight:600;text-align:left;font-size:15.5px">
-                    <th style="padding:10px 18px;">Name</th>
-                    <th style="padding:10px 15px;">Location</th>
-                    <th style="padding:10px 15px;">Time &amp; Date</th>
-                    <th style="padding:10px 15px;">Status</th>
-                  </tr>
-                </thead>
-                <tbody style="font-size:16px;color:#134860">
-                  <tr>
-                    <td style="padding:10px 18px;display:flex;align-items:center;gap:9px;">
-                      <img src="aula.img.jpg" alt="Aula Minor" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #e5e8ee;">
-                      Aula Minor
-                    </td>
-                    <td style="padding:10px 15px;">6th Floor</td>
-                    <td style="padding:10px 15px;">October 30, 2025 10:01 a.m</td>
-                    <td style="padding:10px 15px;">Pending</td>
-                  </tr>
-                  <tr>
-                    <td style="padding:10px 18px;display:flex;align-items:center;gap:9px;">
-                      <img src="gym.img.jpg" alt="Gymnasium" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #e5e8ee;">
-                      Gymnasium
-                    </td>
-                    <td style="padding:10px 15px;">6th Floor</td>
-                    <td style="padding:10px 15px;">October 30, 2025 10:01 a.m</td>
-                    <td style="padding:10px 15px;">Pending</td>
-                  </tr>
-                  <tr>
-                    <td style="padding:10px 18px;display:flex;align-items:center;gap:9px;">
-                      <img src="crown.img.jpg" alt="Crown Jewel" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid #e5e8ee;">
-                      Crown Jewel
-                    </td>
-                    <td style="padding:10px 15px;">Grounds</td>
-                    <td style="padding:10px 15px;">October 30, 2025 10:01 a.m</td>
-                    <td style="padding:10px 15px;">Pending</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div style="flex:1;">
-              <div style="background:#e6f6f6;padding:18px;border-radius:8px;width:210px;box-shadow:0 2px 13px rgba(0,100,91,0.04);margin-bottom:24px;">
-                <div style="font-weight:600;color:#176b86;height:22px;margin-bottom:8px;">Calendar</div>
-                <div style="display:flex;justify-content:center;align-items:center;">
-                  <table style="width:100%;color:#3a4d55;font-size:15.5px;text-align:center;border-collapse:separate; border-spacing: 3px;">
-                    <thead>
-                      <tr style="color:#858aab;font-size:14.2px;">
-                        <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td style="background:transparent;">5</td>
-                        <td style="background:#bbedde;font-weight:700;border-radius:6px;">6</td>
-                        <td>7</td><td>8</td><td>9</td><td>10</td><td>11</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-       
-        <div id="step-4" class="hidden" style="margin-top:18px;">
-          <div style="display:flex;flex-direction:column;align-items:center;">
-            <div style="width:100%;max-width:820px;display:flex;justify-content:center;gap:32px;margin:30px 0 58px 0;">
-              <input id="details-fullname" type="text" placeholder="Full Name"
-                style="padding:12px 18px;border-radius:8px;border:1px solid #dce7eb;font-size:17px;background:#f7fafc;width:230px;outline:none;">
-              <input id="details-course" type="text" placeholder="Course"
-                style="padding:12px 18px;border-radius:8px;border:1px solid #dce7eb;font-size:17px;background:#f7fafc;width:230px;outline:none;">
-              <input id="details-email" type="email" placeholder="Email"
-                style="padding:12px 18px;border-radius:8px;border:1px solid #dce7eb;font-size:17px;background:#f7fafc;width:230px;outline:none;">
             </div>
           </div>
         </div>
 
-       
+        <div id="step-2" class="hidden" style="margin-top:18px">
+          <div class="row res-fields" style="align-items:center">
+            <input id="res-date" type="date">
+            <input id="res-time-from" type="time">
+            <span style="display:inline-flex;align-items:center;padding:0 6px;color:#0ea5a4;font-weight:700">to</span>
+            <input id="res-time-to" type="time">
+            <input id="res-purpose" type="text" placeholder="Purpose" style="min-width:220px">
+          </div>
+        </div>
+
+        <div id="step-3" class="hidden" style="margin-top:18px;">
+          <div class="row" style="align-items:flex-start;justify-content:flex-start;">
+            <div style="flex:2;">
+              <table class="list-table" style="width:100%;background:white;border:1.5px solid #b5cacc;border-radius:8px;overflow:hidden;">
+                <thead><tr><th>Name</th><th>Location</th><th>Time & Date</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><img src="aula.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Aula Minor</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td><td>Pending</td></tr>
+                  <tr><td><img src="gym.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Gymnasium</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td><td>Pending</td></tr>
+                  <tr><td><img src="crown.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Crown Jewel</td><td>Grounds</td><td>October 30, 2025 10:01 a.m</td><td>Pending</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="flex:1;">
+              <div style="background:#e6f6f6;padding:18px;border-radius:8px;width:210px;">
+                <div style="font-weight:600;color:#176b86;margin-bottom:8px">Calendar</div>
+                <div style="display:flex;justify-content:center;"><table style="width:100%;text-align:center;border-spacing:3px"><thead><tr style="color:#858aab"><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody><tr><td>5</td><td style="background:#bbedde;font-weight:700">6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr></tbody></table></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="step-4" class="hidden" style="margin-top:18px;">
+          <div style="display:flex;justify-content:center;gap:32px;margin:30px 0 58px 0;">
+            <input id="details-fullname" type="text" placeholder="Full Name" style="width:230px">
+            <input id="details-course" type="text" placeholder="Course" style="width:230px">
+            <input id="details-email" type="email" placeholder="Email" style="width:230px">
+          </div>
+        </div>
+
         <div id="step-5" class="hidden" style="margin-top:18px;">
-          <div class="validate-table-wrapper" style="display:flex;flex-direction:column;align-items:center;">
+          <div class="validate-table-wrapper">
             <table id="validate-table" class="validate-table">
-              <thead>
-                <tr>
-                  <th>Facility &#8595;</th>
-                  <th>Name &#8595;</th>
-                  <th>Email &#8595;</th>
-                  <th>Course &#8595;</th>
-                  <th>Time &amp; Date &#8595;</th>
-                  <th>Purpose &#8595;</th>
-                  <th>Status &#8595;</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Facility</th><th>Name</th><th>Email</th><th>Course</th><th>Time & Date</th><th>Purpose</th><th>Status</th></tr></thead>
               <tbody>
                 <tr>
-                  <td class="editable" data-key="facility"></td>
-                  <td class="editable" data-key="name" style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                    <img id="validate-avatar" class="validate-avatar" src="user1.jpg" alt="Avatar">
-                    <span id="validate-name" class="editable" data-key="nameText" contenteditable="true"></span>
-                  </td>
-                  <td id="validate-email" class="editable" data-key="email" contenteditable="true"></td>
-                  <td id="validate-course" class="editable" data-key="course" contenteditable="true"></td>
-                  <td id="validate-datetime" class="editable" data-key="datetime" contenteditable="true"></td>
-                  <td id="validate-purpose" class="editable" data-key="purpose" contenteditable="true"></td>
-                  <td id="validate-status" class="editable" data-key="status" contenteditable="false" style="color:green;font-weight:600;">Booked</td>
+                  <td data-key="facility"></td>
+                  <td style="display:flex;align-items:center;gap:8px;justify-content:center"><img id="validate-avatar" class="validate-avatar" src="user1.jpg" alt="avatar"><span id="validate-name" contenteditable="true"></span></td>
+                  <td id="validate-email" contenteditable="true"></td>
+                  <td id="validate-course" contenteditable="true"></td>
+                  <td id="validate-datetime" contenteditable="true"></td>
+                  <td id="validate-purpose" contenteditable="true"></td>
+                  <td id="validate-status" contenteditable="false" style="color:green;font-weight:600">Booked</td>
                 </tr>
               </tbody>
             </table>
@@ -234,219 +148,180 @@
 
         <div class="panel-footer">
           <div class="footer-left"><button id="back-btn" class="btn btn-primary">Back</button></div>
-          <div class="footer-right"><button id="confirm-btn" class="btn next-btn" style="display:none">NEXT</button><button id="next-btn" class="btn next-btn">NEXT</button></div>
+          <div class="footer-right">
+            <div style="display:flex;gap:8px">
+              <button id="confirm-btn" class="btn next-btn" style="display:none">NEXT</button>
+              <button id="next-btn" class="btn next-btn">NEXT</button>
+            </div>
+          </div>
         </div>
       </section>
     </main>
-    <footer class="sitebar" aria-hidden="true"></footer>
+
+    <footer style="height:80px;background:#176b86"></footer>
 
     <script>
-      document.addEventListener('DOMContentLoaded', ()=>{
+      (function(){
+        const STORAGE_KEY = 'facilica_reservation_v1';
+
         const facilitySelect = document.getElementById('facility-select');
         const previewImg = document.getElementById('preview-img');
         const previewPlaceholder = document.getElementById('preview-placeholder');
-        const stepEls = Array.from(document.querySelectorAll('.steps .step'));
-        const step1 = document.getElementById('step-1');
-        const step2 = document.getElementById('step-2');
-        const step3 = document.getElementById('step-3');
-        const step4 = document.getElementById('step-4');
-        const step5 = document.getElementById('step-5');
-        const nextBtn = document.getElementById('next-btn');
-        const backBtn = document.getElementById('back-btn');
-        const confirmBtn = document.getElementById('confirm-btn');
-        const resDate = document.getElementById('res-date');
-        const resFrom = document.getElementById('res-time-from');
-        const resTo = document.getElementById('res-time-to');
-        const resPurpose = document.getElementById('res-purpose');
         const descTitle = document.getElementById('desc-title');
         const descText = document.getElementById('desc-text');
-        const detailsFullname = document.getElementById('details-fullname');
-        const detailsCourse = document.getElementById('details-course');
-        const detailsEmail = document.getElementById('details-email');
+        const stepEls = Array.from(document.querySelectorAll('.steps .step'));
+        const steps = {
+          1: document.getElementById('step-1'),
+          2: document.getElementById('step-2'),
+          3: document.getElementById('step-3'),
+          4: document.getElementById('step-4'),
+          5: document.getElementById('step-5')
+        };
+        const nextBtn = document.getElementById('next-btn'),
+              backBtn = document.getElementById('back-btn'),
+              confirmBtn = document.getElementById('confirm-btn');
 
-      
-        const facilities = {
-          'Aula Minor': 'aula.img.jpg',
-          'Crown Jewel': 'crown.img.jpg',
-          'Gymnasium': 'gym.img.jpg'
+        const resDate = document.getElementById('res-date'),
+              resFrom = document.getElementById('res-time-from'),
+              resTo = document.getElementById('res-time-to'),
+              resPurpose = document.getElementById('res-purpose');
+
+        const detailsFullname = document.getElementById('details-fullname'),
+              detailsCourse = document.getElementById('details-course'),
+              detailsEmail = document.getElementById('details-email');
+
+        const FAC = {
+          'Aula Minor': { img: 'aula.img.jpg', title: 'Aula Minor', text: 'A mid-sized indoor hall suitable for meetings and events.'},
+          'Crown Jewel': { img: 'crown.img.jpg', title: 'Crown Jewel', text: 'A premier multi-purpose hall ideal for ceremonies and seminars.'},
+          'Gymnasium': { img: 'gym.img.jpg', title: 'Gymnasium', text: 'A fully covered gymnasium perfect for sports and assemblies.'}
         };
 
-        const facilityDescriptions = {
-          'Aula Minor': {
-            title: 'Aula Minor',
-            text: 'A mid-sized indoor hall suitable for meetings, training sessions, and school activities, equipped with audio-visual facilities for an efficient event experience.'
-          },
-          'Crown Jewel': {
-            title: 'Crown Jewel',
-            text: 'A premier multi-purpose hall ideal for ceremonies, seminars, and large school events, equipped with stage and sound facilities.'
-          },
-          'Gymnasium': {
-            title: 'Gymnasium',
-            text: 'A fully covered gymnasium perfect for sports activities, physical education classes, and large assemblies.'
-          }
-        };
-
-        function createFilenameCandidates(name){
-          const exact = facilities[name] || name;
-          const c = [exact, encodeURI(exact)];
-          const simple = exact.toLowerCase();
-          c.push(simple.replace(/\s+/g,'-'));
-          c.push(simple.replace(/\s+/g,'_'));
-          c.push(simple.replace(/\s+/g,''));
-          return Array.from(new Set(c));
+        function setPreview(name){
+          const d = FAC[name];
+          if(d && d.img){
+            previewImg.src = d.img; previewImg.style.display='block'; previewPlaceholder.style.display='none';
+          } else { previewImg.style.display='none'; previewPlaceholder.style.display='flex'; }
+          descTitle.textContent = d ? d.title : '';
+          descText.textContent = d ? d.text : '';
         }
-
-        function makePlaceholder(name){
-          const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='520' height='320'><rect width='100%' height='100%' fill='%23e9f6f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%230b2b2d' font-family='Arial' font-size='28'>${name}</text></svg>`;
-          return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-        }
-
-        function trySetImage(img, candidates){
-          return new Promise(resolve=>{
-            let i=0;
-            function next(){
-              if(i>=candidates.length){ img.src = makePlaceholder('No image'); return resolve(false); }
-              const s=candidates[i++];
-              img.onload = ()=>{ resolve(true); };
-              img.onerror = ()=>{ next(); };
-              img.src = s;
-            }
-            next();
-          });
-        }
-
-        async function setPreview(name){ 
-          const ok = await trySetImage(previewImg, createFilenameCandidates(name)); 
-          if(ok){ previewImg.style.display='block'; if(previewPlaceholder) previewPlaceholder.style.display='none'; }
-          else { previewImg.style.display='none'; if(previewPlaceholder) previewPlaceholder.style.display='flex'; }
-          const d = facilityDescriptions[name];
-          if(d){ descTitle.textContent = d.title; descText.textContent = d.text; }
-          else { descTitle.textContent=''; descText.textContent=''; }
-        }
-
-        facilitySelect.addEventListener('change', ()=>{
-          const name = facilitySelect.value;
-          if(name){ setPreview(name); }
+        facilitySelect.addEventListener('change', ()=> {
+          setPreview(facilitySelect.value);
+          saveDraft();
         });
 
-     
-        function populateValidateSummary() {
-          const facility = facilitySelect.value || "Aula Minor";
-          const name = (detailsFullname?.value || "Jessica Miranda");
-          const email = (detailsEmail?.value || "jessica@example.com");
-          const course = (detailsCourse?.value || "BSIT");
-          const purpose = (resPurpose?.value || "Seminar");
-          const status = "Booked";
-          const date = resDate?.value || "";
-          const from = resFrom?.value || "";
-          const to = resTo?.value || "";
-          let datetimeDisplay = "";
-          if (date && from && to) {
-            const dateObj = new Date(date);
-            const y = dateObj.getFullYear(), m = dateObj.toLocaleString('default',{month:'long'}), d=dateObj.getDate();
-            const timeFrom = from.length>0 ? new Date(`1970-01-01T${from}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
-            const timeTo = to.length>0 ? new Date(`1970-01-01T${to}:00`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
-            datetimeDisplay = `${m} ${d}, ${y} ${timeFrom} am-${timeTo}pm`;
-          } else {
-            datetimeDisplay = "N/A";
-          }
-
-      
-          document.querySelector('#validate-table td[data-key="facility"]').textContent = facility;
-          document.querySelector('#validate-name').textContent = name;
-          document.getElementById('validate-avatar').src = "user1.jpg"; 
-          document.getElementById('validate-email').textContent = email;
-          document.getElementById('validate-course').textContent = course;
-          document.getElementById('validate-datetime').textContent = datetimeDisplay;
-          document.getElementById('validate-purpose').textContent = purpose;
-          document.getElementById('validate-status').textContent = status;
+        // step control
+        let current = 1;
+        function setStep(n){
+          current = n;
+          Object.keys(steps).forEach(k => steps[k].classList.toggle('hidden', Number(k)!==n));
+          stepEls.forEach((el,idx)=> el.classList.toggle('active', idx+1 <= n));
+          backBtn.style.display = n===1 ? 'none' : 'inline-flex';
+          if(n===2 || n===5){ nextBtn.style.display='none'; confirmBtn.style.display='inline-flex'; confirmBtn.textContent = n===5 ? 'SUBMIT' : 'CONFIRM'; }
+          else { nextBtn.style.display='inline-flex'; confirmBtn.style.display='none'; }
+          if(n===5) populateValidateSummary();
         }
 
-        let currentStep = 1;
-        function setActiveStep(n){ 
-          currentStep = n; 
-          step1.classList.toggle('hidden', n!==1); 
-          step2.classList.toggle('hidden', n!==2); 
-          step3.classList.toggle('hidden', n!==3); 
-          step4.classList.toggle('hidden', n!==4);
-          step5.classList.toggle('hidden', n!==5);
-          stepEls.forEach((el,idx)=>{
-            if(idx+1<=n) el.classList.add('active');
-            else el.classList.remove('active');
-          });
-          if(n===1){
-            backBtn.style.display='none'; nextBtn.style.display='inline-block'; confirmBtn.style.display='none';
-          } else if(n===2){
-            backBtn.style.display='inline-block'; nextBtn.style.display='none'; confirmBtn.style.display='inline-block';
-          } else if(n===3){
-            backBtn.style.display='inline-block'; nextBtn.style.display='inline-block'; confirmBtn.style.display='none';
-          } else if(n===4){
-            backBtn.style.display='inline-block'; nextBtn.style.display='inline-block'; confirmBtn.style.display='none';
-          } else if(n===5){
-            backBtn.style.display='inline-block'; nextBtn.style.display='none'; confirmBtn.style.display='inline-block';
-            confirmBtn.textContent = "SUBMIT";
-            populateValidateSummary();
-           
-            document.querySelectorAll('#validate-table .editable').forEach(td => {
-              td.setAttribute("contenteditable", td.dataset.key !== 'facility' && td.dataset.key !== 'status' ? "true" : "false");
-              td.addEventListener('focus', function(e){
-                this.style.background = "#fafdcf";
-              });
-              td.addEventListener('blur', function(e){
-                this.style.background = "";
-              });
-            });
-          }
+        function formatDateTime(dateStr, fromStr, toStr){
+          if(!dateStr) return 'N/A';
+          const date = new Date(dateStr);
+          const datePart = date.toLocaleString(undefined,{month:'long',day:'numeric',year:'numeric'});
+          const from = fromStr ? new Date('1970-01-01T'+fromStr+':00').toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+          const to = toStr ? new Date('1970-01-01T'+toStr+':00').toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+          return datePart + (from && to ? ' ' + from + ' - ' + to : '');
+        }
+        function populateValidateSummary(){
+          const facility = facilitySelect.value || 'Aula Minor';
+          const name = detailsFullname.value || 'Jessica Miranda';
+          const email = detailsEmail.value || 'jessica@example.com';
+          const course = detailsCourse.value || 'BSIT';
+          const purpose = resPurpose.value || 'Seminar';
+          const datetime = formatDateTime(resDate.value, resFrom.value, resTo.value);
+          const row = document.querySelector('#validate-table tbody tr');
+          row.querySelector('td[data-key="facility"]').textContent = facility;
+          document.getElementById('validate-name').textContent = name;
+          document.getElementById('validate-email').textContent = email;
+          document.getElementById('validate-course').textContent = course;
+          document.getElementById('validate-datetime').textContent = datetime;
+          document.getElementById('validate-purpose').textContent = purpose;
+          document.getElementById('validate-status').textContent = 'Booked';
         }
 
         nextBtn.addEventListener('click', ()=>{
-          if(currentStep===1){
-            const selected = facilitySelect.value;
-            if(!selected || selected===''){ alert('Please select a facility first'); return; }
-            setActiveStep(2);
-          } else if(currentStep===2) {
-            setActiveStep(3);
-          } else if(currentStep===3){
-            setActiveStep(4);
-          } else if(currentStep===4) {
-            setActiveStep(5);
-          }
+          if(current===1){ if(!facilitySelect.value){ alert('Please select a facility first'); return; } setStep(2); return; }
+          if(current<5) setStep(current+1);
         });
-        backBtn.addEventListener('click', ()=>{
-          if(currentStep===2) setActiveStep(1);
-          else if(currentStep===3) setActiveStep(2);
-          else if(currentStep===4) setActiveStep(3);
-          else if(currentStep===5) setActiveStep(4);
-          else setActiveStep(1);
-        });
+        backBtn.addEventListener('click', ()=> setStep(Math.max(1,current-1)));
 
         confirmBtn.addEventListener('click', ()=>{
-          if(currentStep===2){
-            const date=resDate.value, from=resFrom.value, to=resTo.value, purpose=resPurpose.value, facility=facilitySelect.value;
-            if(!date){ alert('Please select a date'); return; }
-            if(!from||!to){ alert('Please select start and end time'); return; }
-            if(to<=from){ alert('End time must be after start time'); return; }
-            setActiveStep(3);
-          } else if(currentStep===5){
-         
-            const facility = document.querySelector('#validate-table td[data-key="facility"]').textContent;
+          if(current===2){
+            if(!resDate.value){ alert('Please select a date'); return; }
+            if(!resFrom.value || !resTo.value){ alert('Please select start and end time'); return; }
+            if(resTo.value <= resFrom.value){ alert('End time must be after start time'); return; }
+            setStep(3);
+          } else if(current===5){
+            // final submit (demo)
+            const r = document.querySelector('#validate-table tbody tr');
+            const facility = r.querySelector('td[data-key="facility"]').textContent;
             const name = document.getElementById('validate-name').textContent;
             const email = document.getElementById('validate-email').textContent;
             const course = document.getElementById('validate-course').textContent;
             const datetime = document.getElementById('validate-datetime').textContent;
             const purpose = document.getElementById('validate-purpose').textContent;
-            const status = document.getElementById('validate-status').textContent;
-            alert(`Submitted!\n${facility}, ${name}, ${email}, ${course}, ${datetime}, ${purpose}, ${status}`);
+            alert('Submitted!\\n' + [facility,name,email,course,datetime,purpose,'Booked'].join(', '));
           }
         });
 
-        if(previewImg) previewImg.style.display = 'none';
-        if(previewPlaceholder) previewPlaceholder.style.display = 'flex';
-        descTitle.textContent = '';
-        descText.textContent = '';
+        // -------- localStorage autosave / load --------
+        function saveDraft(){
+          try{
+            const draft = {
+              facility: facilitySelect.value,
+              resDate: resDate.value,
+              resFrom: resFrom.value,
+              resTo: resTo.value,
+              purpose: resPurpose.value,
+              fullname: detailsFullname.value,
+              course: detailsCourse.value,
+              email: detailsEmail.value
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+            // kept console.log for debugging if you open DevTools
+            console.log('Draft saved to localStorage:', draft);
+          }catch(e){
+            console.warn('Could not save draft', e);
+          }
+        }
+        function loadDraft(){
+          try{
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(!raw) return;
+            const d = JSON.parse(raw);
+            if(d.facility) { facilitySelect.value = d.facility; setPreview(d.facility); }
+            if(d.resDate) resDate.value = d.resDate;
+            if(d.resFrom) resFrom.value = d.resFrom;
+            if(d.resTo) resTo.value = d.resTo;
+            if(d.purpose) resPurpose.value = d.purpose;
+            if(d.fullname) detailsFullname.value = d.fullname;
+            if(d.course) detailsCourse.value = d.course;
+            if(d.email) detailsEmail.value = d.email;
+            console.log('Draft loaded from localStorage:', d);
+          }catch(e){
+            console.warn('Could not load draft', e);
+          }
+        }
+        // Save on input changes
+        [resDate,resFrom,resTo,resPurpose,detailsFullname,detailsCourse,detailsEmail].forEach(el=>{
+          el && el.addEventListener('input', saveDraft);
+        });
 
-        setActiveStep(1);
-      });
+        // load draft at init
+        loadDraft();
+
+        // init
+        previewImg.style.display='none';
+        previewPlaceholder.style.display='flex';
+        setStep(1);
+      })();
     </script>
   </body>
 </html>
