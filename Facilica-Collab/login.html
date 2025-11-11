@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Facilica — Facility Reservation Login</title>
+    <style>
+      :root{
+        --teal:#0ea5a4;
+        --dark:#16697a;
+        --muted:#e6fbfb;
+        --accent:#16a086;
+        --bg:#cff6f5;
+        --card:#0f6c78;
+        --radius:10px;
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      }
+
+      html,body{height:100%;margin:0}
+      body{
+        display:flex;align-items:center;justify-content:center;
+        background:linear-gradient(180deg,var(--bg),#e6f9f8);
+        color:#034047;
+        padding:24px;
+      }
+
+      .container{
+        width:100%;max-width:1000px;background:white;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(2,31,37,0.12);display:flex;min-height:520px;
+      }
+
+      .left{
+        flex:1.1;background:linear-gradient(180deg,#e6fbfb,#d7f5f4);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;
+      }
+
+  .brand-logo{max-width:480px;width:85%;height:auto}
+  .app-name{display:none}
+  .tag{display:none}
+
+  .right{flex:.9;background:var(--card);color:var(--muted);padding:48px;display:flex;flex-direction:column;justify-content:center;gap:18px;position:relative}
+      h2{margin:0 0 6px 0;font-weight:600;color:#7fe6e0}
+      .form{
+        display:flex;flex-direction:column;gap:12px;margin-top:8px
+      }
+      .link-button{background:transparent;border:none;color:#7fe6e0;cursor:pointer;padding:0;font-size:14px}
+      .hidden{display:none}
+
+      label{font-size:13px;color:rgba(255,255,255,0.9)}
+      input[type=text],input[type=password]{padding:12px 14px;border-radius:999px;border:none;outline:none;font-size:14px}
+      .input-wrap{background:rgba(255,255,255,0.12);padding:8px;border-radius:999px}
+
+      .btn{background:var(--accent);color:white;padding:12px;border-radius:999px;border:none;font-weight:600;cursor:pointer}
+      .btn.secondary{background:transparent;border:2px solid rgba(255,255,255,0.14);color:var(--muted)}
+
+      .help{font-size:13px;color:rgba(255,255,255,0.85);margin-top:6px}
+
+      .footer-note{font-size:12px;color:rgba(255,255,255,0.65);margin-top:6px}
+
+      @media (max-width:880px){
+        .container{flex-direction:column;min-height:unset}
+        .left{padding:28px}
+        .right{padding:28px}
+      }
+      /* Modal styles */
+      .modal-backdrop{position:fixed;inset:0;background:rgba(2,31,37,0.45);display:none;align-items:center;justify-content:center;z-index:60}
+      .modal{background:white;border-radius:8px;padding:28px 32px;max-width:560px;width:86%;box-shadow:0 10px 30px rgba(2,31,37,0.2);position:relative;color:#0b2b2d}
+      .modal .close{position:absolute;top:10px;right:12px;border:none;background:transparent;font-size:18px;cursor:pointer}
+      .modal .icon{display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+      .modal .message{text-align:center;font-size:16px}
+    </style>
+  </head>
+  <body>
+
+    <main class="container" role="main">
+    <section class="left" aria-label="Brand">
+  <!-- Use the user's provided (background-removed) logo image (enlarged, text removed) -->
+  <img src="unnamed-removebg-preview.png" alt="Facilica logo — facility reservation" class="brand-logo">
+    </section>
+
+      <aside class="right" aria-label="Login form">
+  <!-- College crest placed top-right (background removed) -->
+  <img src="Pasig_catholic_seal-removebg-preview.png" alt="Pasig Catholic College crest" style="position:absolute;top:18px;right:18px;width:72px;height:auto;border-radius:6px;background:rgba(255,255,255,0.03);padding:4px">
+        <div>
+          <h2>Welcome back</h2>
+          <p class="help">Sign in to manage facility reservations</p>
+        </div>
+
+        <form id="login-form" class="form" action="#" method="post" onsubmit="handleSubmit(event)">
+          <div>
+            <label for="idnum">ID Number</label>
+            <div class="input-wrap">
+              <input id="idnum" name="idnum" type="text" placeholder="24-1234" required aria-required="true" aria-label="ID number in format 24-0592">
+            </div>
+          </div>
+
+          <div>
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input id="password" name="password" type="password" placeholder="••••••••" required aria-required="true">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px">
+            <button type="submit" class="btn">Sign in</button>
+          </div>
+
+          <div class="footer-note"> 
+            <button id="forgot-btn" type="button" class="link-button" onclick="showForgot()">Forgot Password?</button>
+          </div>
+        </form>
+
+        <!-- Forgot-password panel (separate UI shown when clicking the link) -->
+        <div id="forgot-ui" class="hidden">
+          <h2>Forget Password?</h2>
+          <p class="help">Enter your ID or Email Address to receive reset instructions.</p>
+          <div style="margin-top:8px">
+            <label for="recover-identifier">ID/Email Address</label>
+            <div class="input-wrap" style="margin-top:6px">
+              <input id="recover-identifier" name="recover-identifier" type="text" placeholder="ID/Email Address" aria-label="ID or email address">
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px;max-width:220px">
+            <button id="recover-submit" type="button" class="btn" onclick="handleRecover()">Submit</button>
+            <button id="recover-back" type="button" class="btn secondary" onclick="showLogin()">Go back</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Success modal shown after submitting forgot-password -->
+    <div id="modal-backdrop" class="modal-backdrop" role="dialog" aria-hidden="true" aria-labelledby="modal-title">
+      <div class="modal" role="document">
+        <button class="close" aria-label="Close" onclick="closeModal()">✕</button>
+        <div class="icon" aria-hidden="true">
+          <!-- simple check icon -->
+          <svg width="96" height="96" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="4" fill="#fff"/>
+            <path d="M20 6L9 17l-5-5" stroke="#0b2b2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div id="modal-title" class="message">Success! Check your email to reset your password.</div>
+      </div>
+    </div>
+
+    <script>
+      function handleSubmit(e){
+        e.preventDefault();
+        const id = document.getElementById('idnum').value.trim();
+        const pw = document.getElementById('password').value;
+        const idPattern = /^\d{2}-\d{4}$/; // e.g. 24-0592
+        if(!id){ alert('Please enter your ID'); return }
+        if(!idPattern.test(id)){ alert('ID must be in format 24-0592'); return }
+        if(!pw){ alert('Please enter your password'); return }
+        // Demo behaviour: replace with real auth integration.
+        alert('Signed in (demo) as ID ' + id);
+        window.location.href = "Home 2.0.html";
+      }
+
+      function showForgot(){
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('forgot-ui').classList.remove('hidden');
+      }
+
+      function showLogin(){
+        document.getElementById('forgot-ui').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+      }
+
+      function handleRecover(){
+        const v = document.getElementById('recover-identifier').value.trim();
+        if(!v){ alert('Please enter your ID or email'); return }
+        // Demo behaviour: show modal success message instead of alert
+        showModal('Success! Check your email to reset your password.');
+      }
+
+      function goBack(){ window.history.length>1 ? window.history.back() : alert('No previous page'); }
+    </script>
+
+  </body>
+</html>
