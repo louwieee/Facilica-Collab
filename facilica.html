@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Campus Facilities — Facilica (single-file with localStorage)</title>
+    <title>Campus Facilities — Facilica (single-file with localStorage + JSON save + Cancel)</title>
     <style>
       :root{--teal:#0ea5a4;--blue:#176b86;--card:#e6f6f6;--accent:#03753a}
       *{box-sizing:border-box}
@@ -31,7 +31,7 @@
       table{border-collapse:collapse}
       .list-table thead th{background:#eef9f5;color:var(--blue);font-weight:600;padding:10px 14px;text-align:left;font-size:15.5px}
       .list-table td{padding:10px 14px;color:#134860;font-size:16px;border-top:1px solid rgba(0,0,0,0.03)}
-      .validate-table-wrapper{display:flex;justify-content:center}
+      .validate-table-wrapper{display:flex;flex-direction:column;align-items:center}
       .validate-table{width:90%;max-width:950px;margin:30px auto;background:white;border:6px solid #53b6be;border-radius:10px;overflow:hidden;box-shadow:0 2px 13px rgba(0,100,91,0.04)}
       .validate-table th{background:var(--blue);color:white;padding:13px;font-weight:600}
       .validate-table td{padding:10px;text-align:center;font-size:16px}
@@ -42,6 +42,8 @@
       .btn.secondary{background:transparent;border:1px solid rgba(0,0,0,0.06);color:#034047}
       .next-btn{background:#0b6b2f;color:white}
       .hidden{display:none}
+      .error{color:#b00020;font-size:13px;margin-top:8px;display:none}
+      .cancel-btn{background:transparent;color:#b00020;border:1px solid rgba(176,0,32,0.12);padding:8px 12px;border-radius:8px;cursor:pointer;margin-top:12px}
       @media (max-width:880px){ .row{flex-direction:column} }
     </style>
   </head>
@@ -65,12 +67,14 @@
         <div id="step-1">
           <div class="row">
             <div class="col-1">
+              <label class="sr-only" for="facility-select">Facility</label>
               <select id="facility-select" aria-label="Select facility">
                 <option value="">Select</option>
                 <option value="Aula Minor">Aula Minor</option>
                 <option value="Crown Jewel">Crown Jewel</option>
                 <option value="Gymnasium">Gymnasium</option>
               </select>
+              <div id="err-facility" class="error">Please select a facility.</div>
             </div>
 
             <div class="row flex-1" style="align-items:flex-start">
@@ -90,12 +94,25 @@
 
         <div id="step-2" class="hidden" style="margin-top:18px">
           <div class="row res-fields" style="align-items:center">
-            <input id="res-date" type="date">
-            <input id="res-time-from" type="time">
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="res-date">Reservation Date</label>
+              <input id="res-date" type="date" aria-label="Reservation date">
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="res-time-from">Start time</label>
+              <input id="res-time-from" type="time" aria-label="Start time">
+            </div>
             <span style="display:inline-flex;align-items:center;padding:0 6px;color:#0ea5a4;font-weight:700">to</span>
-            <input id="res-time-to" type="time">
-            <input id="res-purpose" type="text" placeholder="Purpose" style="min-width:220px">
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="res-time-to">End time</label>
+              <input id="res-time-to" type="time" aria-label="End time">
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="res-purpose">Purpose</label>
+              <input id="res-purpose" type="text" placeholder="Purpose" style="min-width:220px" aria-label="Purpose">
+            </div>
           </div>
+          <div id="err-reservation" class="error">Please complete date, time, and purpose.</div>
         </div>
 
         <div id="step-3" class="hidden" style="margin-top:18px;">
@@ -103,7 +120,7 @@
             <div style="flex:2;">
               <table class="list-table" style="width:100%;background:white;border:1.5px solid #b5cacc;border-radius:8px;overflow:hidden;">
                 <thead><tr><th>Name</th><th>Location</th><th>Time & Date</th><th>Status</th></tr></thead>
-                <tbody>
+                <tbody id="existing-reservations">
                   <tr><td><img src="aula.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Aula Minor</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td>  
                     <td>Pending</td></tr>
                   <tr><td><img src="gym.img.jpg" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px">Gymnasium</td><td>6th Floor</td><td>October 30, 2025 10:01 a.m</td>
@@ -125,18 +142,28 @@
 
         <div id="step-4" class="hidden" style="margin-top:18px;">
           <div style="display:flex;justify-content:center;gap:32px;margin:30px 0 58px 0;">
-            <input id="details-fullname" type="text" placeholder="Full Name" style="width:230px">
-            <input id="details-course" type="text" placeholder="Course" style="width:230px">
-            <input id="details-email" type="email" placeholder="Email" style="width:230px">
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="details-fullname">Full name</label>
+              <input id="details-fullname" type="text" placeholder="Full Name" style="width:230px" aria-label="Full name">
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="details-course">Course</label>
+              <input id="details-course" type="text" placeholder="Course" style="width:230px" aria-label="Course">
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <label class="sr-only" for="details-email">Email</label>
+              <input id="details-email" type="email" placeholder="Email" style="width:230px" aria-label="Email">
+            </div>
           </div>
+          <div id="err-details" class="error">Please enter name, course, and valid email.</div>
         </div>
 
         <div id="step-5" class="hidden" style="margin-top:18px;">
           <div class="validate-table-wrapper">
-            <table id="validate-table" class="validate-table">
+            <table id="validate-table" class="validate-table" aria-label="Reservation summary">
               <thead><tr><th>Facility</th><th>Name</th><th>Email</th><th>Course</th><th>Time & Date</th><th>Purpose</th><th>Status</th></tr></thead>
               <tbody>
-                <tr>
+                <tr id="validate-row" data-res-id="">
                   <td data-key="facility"></td>
                   <td style="display:flex;align-items:center;gap:8px;justify-content:center"><img id="validate-avatar" class="validate-avatar" src="user1.jpg" alt="avatar"><span id="validate-name" contenteditable="true"></span></td>
                   <td id="validate-email" contenteditable="true"></td>
@@ -147,6 +174,9 @@
                 </tr>
               </tbody>
             </table>
+
+            <!-- Cancel booking button shown when a saved booking exists -->
+            <button id="cancel-booking-btn" class="cancel-btn hidden" aria-label="Cancel booking">Cancel Booking</button>
           </div>
         </div>
 
@@ -167,6 +197,8 @@
     <script>
       (function(){
         const STORAGE_KEY = 'facilica_reservation_v1';
+        const RESERVATIONS_KEY = 'facilica_reservations_v1';
+        const LAST_RES_KEY = 'facilica_last_reservation_id';
 
         const facilitySelect = document.getElementById('facility-select');
         const previewImg = document.getElementById('preview-img');
@@ -194,6 +226,15 @@
               detailsCourse = document.getElementById('details-course'),
               detailsEmail = document.getElementById('details-email');
 
+        const errFacility = document.getElementById('err-facility'),
+              errReservation = document.getElementById('err-reservation'),
+              errDetails = document.getElementById('err-details');
+
+        const cancelBookingBtn = document.getElementById('cancel-booking-btn');
+        const validateRow = document.getElementById('validate-row');
+
+        let lastSavedReservationId = localStorage.getItem(LAST_RES_KEY) || null;
+
         const FAC = {
           'Aula Minor': { img: 'aula.img.jpg', title: 'Aula Minor', text: 'A mid-sized indoor hall suitable for meetings and events.'},
           'Crown Jewel': { img: 'crown.img.jpg', title: 'Crown Jewel', text: 'A premier multi-purpose hall ideal for ceremonies and seminars.'},
@@ -210,8 +251,70 @@
         }
         facilitySelect.addEventListener('change', ()=> {
           setPreview(facilitySelect.value);
+          hideError(errFacility);
           saveDraft();
         });
+
+        // simple validators
+        function isEmail(v){
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        }
+        function validateReservation(){
+          if(!resDate.value || !resFrom.value || !resTo.value) return {ok:false, msg:'Please complete reservation date and times.'};
+          if(resTo.value <= resFrom.value) return {ok:false, msg:'End time must be after start time.'};
+          if(!resPurpose.value || !resPurpose.value.trim()) return {ok:false, msg:'Purpose is required.'};
+          return {ok:true};
+        }
+        function validateDetails(){
+          if(!detailsFullname.value || !detailsFullname.value.trim()) return {ok:false, msg:'Full name is required.'};
+          if(!detailsCourse.value || !detailsCourse.value.trim()) return {ok:false, msg:'Course is required.'};
+          if(!detailsEmail.value || !detailsEmail.value.trim()) return {ok:false, msg:'Email is required.'};
+          if(!isEmail(detailsEmail.value.trim())) return {ok:false, msg:'Email format is invalid.'};
+          return {ok:true};
+        }
+
+        // small helpers for showing/hiding errors
+        function showError(el, message){
+          if(!el) return;
+          el.textContent = message;
+          el.style.display = 'block';
+        }
+        function hideError(el){
+          if(!el) return;
+          el.style.display = 'none';
+        }
+
+        // helper to persist reservation(s) array as JSON in localStorage
+        function saveReservationToLocal(reservation){
+          try{
+            const raw = localStorage.getItem(RESERVATIONS_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            list.push(reservation);
+            localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(list));
+            // remember last saved reservation id to support cancel
+            lastSavedReservationId = reservation.id;
+            localStorage.setItem(LAST_RES_KEY, lastSavedReservationId);
+            console.log('Reservation saved to', RESERVATIONS_KEY, reservation);
+          }catch(e){
+            console.warn('Could not save reservation', e);
+          }
+        }
+
+        // helper to remove reservation by id
+        function removeReservationById(id){
+          try{
+            const raw = localStorage.getItem(RESERVATIONS_KEY);
+            if(!raw) return false;
+            const list = JSON.parse(raw);
+            const filtered = list.filter(r => r.id !== id);
+            localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(filtered));
+            console.log('Removed reservation', id);
+            return true;
+          }catch(e){
+            console.warn('Could not remove reservation', e);
+            return false;
+          }
+        }
 
         // step control
         let current = 1;
@@ -223,6 +326,8 @@
           if(n===2 || n===5){ nextBtn.style.display='none'; confirmBtn.style.display='inline-flex'; confirmBtn.textContent = n===5 ? 'SUBMIT' : 'CONFIRM'; }
           else { nextBtn.style.display='inline-flex'; confirmBtn.style.display='none'; }
           if(n===5) populateValidateSummary();
+          // hide cancel button unless step 5 and a saved reservation exists
+          if(n !== 5) hideCancelButton();
         }
 
         function formatDateTime(dateStr, fromStr, toStr){
@@ -234,11 +339,11 @@
           return datePart + (from && to ? ' ' + from + ' - ' + to : '');
         }
         function populateValidateSummary(){
-          const facility = facilitySelect.value || 'Aula Minor';
-          const name = detailsFullname.value || 'Jessica Miranda';
-          const email = detailsEmail.value || 'jessica@example.com';
-          const course = detailsCourse.value || 'BSIT';
-          const purpose = resPurpose.value || 'Seminar';
+          const facility = facilitySelect.value || '';
+          const name = detailsFullname.value || '';
+          const email = detailsEmail.value || '';
+          const course = detailsCourse.value || '';
+          const purpose = resPurpose.value || '';
           const datetime = formatDateTime(resDate.value, resFrom.value, resTo.value);
           const row = document.querySelector('#validate-table tbody tr');
           row.querySelector('td[data-key="facility"]').textContent = facility;
@@ -248,32 +353,111 @@
           document.getElementById('validate-datetime').textContent = datetime;
           document.getElementById('validate-purpose').textContent = purpose;
           document.getElementById('validate-status').textContent = 'Booked';
+
+          // attach last saved reservation id (if available)
+          const storedId = localStorage.getItem(LAST_RES_KEY);
+          if(storedId){
+            validateRow.setAttribute('data-res-id', storedId);
+            showCancelButton();
+          } else {
+            validateRow.setAttribute('data-res-id', '');
+            hideCancelButton();
+          }
+        }
+
+        function showCancelButton(){
+          if(!cancelBookingBtn) return;
+          cancelBookingBtn.classList.remove('hidden');
+        }
+        function hideCancelButton(){
+          if(!cancelBookingBtn) return;
+          cancelBookingBtn.classList.add('hidden');
         }
 
         nextBtn.addEventListener('click', ()=>{
-          if(current===1){ if(!facilitySelect.value){ alert('Please select a facility first'); return; } setStep(2); return; }
+          // moving forward
+          if(current===1){
+            if(!facilitySelect.value){ showError(errFacility, 'Please select a facility first'); return; }
+            hideError(errFacility);
+            setStep(2);
+            return;
+          }
           if(current<5) setStep(current+1);
         });
         backBtn.addEventListener('click', ()=> setStep(Math.max(1,current-1)));
 
         confirmBtn.addEventListener('click', ()=>{
           if(current===2){
-            if(!resDate.value){ alert('Please select a date'); return; }
-            if(!resFrom.value || !resTo.value){ alert('Please select start and end time'); return; }
-            if(resTo.value <= resFrom.value){ alert('End time must be after start time'); return; }
+            // validate reservation fields before allowing confirmation
+            const r = validateReservation();
+            if(!r.ok){ showError(errReservation, r.msg); return; }
+            hideError(errReservation);
             setStep(3);
           } else if(current===5){
-            // final submit (demo)
-            const r = document.querySelector('#validate-table tbody tr');
-            const facility = r.querySelector('td[data-key="facility"]').textContent;
-            const name = document.getElementById('validate-name').textContent;
-            const email = document.getElementById('validate-email').textContent;
-            const course = document.getElementById('validate-course').textContent;
-            const datetime = document.getElementById('validate-datetime').textContent;
-            const purpose = document.getElementById('validate-purpose').textContent;
-            alert('Submitted!\\n' + [facility,name,email,course,datetime,purpose,'Booked'].join(', '));
+            // final submit: run full validation (reservation + details + facility)
+            if(!facilitySelect.value){ showError(errFacility, 'Please select a facility'); setStep(1); return; }
+            const r = validateReservation();
+            if(!r.ok){ showError(errReservation, r.msg); setStep(2); return; }
+            const d = validateDetails();
+            if(!d.ok){ showError(errDetails, d.msg); setStep(4); return; }
+
+            // All validations passed — build reservation object
+            const reservation = {
+              id: 'res_' + Date.now(),
+              facility: facilitySelect.value,
+              date: resDate.value,
+              timeFrom: resFrom.value,
+              timeTo: resTo.value,
+              purpose: resPurpose.value,
+              fullname: detailsFullname.value,
+              course: detailsCourse.value,
+              email: detailsEmail.value,
+              createdAt: new Date().toISOString()
+            };
+
+            // persist as JSON array in localStorage
+            saveReservationToLocal(reservation);
+
+            // Demo submission feedback
+            alert('Reservation saved (demo). ID: ' + reservation.id);
+
+            // Clear inputs & localStorage draft after successful submit (as requested)
+            clearAll();
+
+            // show initial step after clearing
+            setPreview(''); // show placeholder
+            setStep(1);
           }
         });
+
+        // Cancel booking handler — deletes the saved reservation (using last saved id) and resets UI
+        function cancelBooking(){
+          const id = localStorage.getItem(LAST_RES_KEY) || validateRow.getAttribute('data-res-id') || lastSavedReservationId;
+          if(!id){
+            alert('No saved booking found to cancel.');
+            return;
+          }
+          const removed = removeReservationById(id);
+          if(removed){
+            // remove LAST_RES_KEY and clear session tracking
+            localStorage.removeItem(LAST_RES_KEY);
+            lastSavedReservationId = null;
+
+            // clear UI and draft
+            clearAll();
+
+            // reset preview and go to step 1
+            setPreview('');
+            setStep(1);
+
+            hideCancelButton();
+            alert('Booking cancelled successfully.');
+          }else{
+            alert('Could not cancel booking. It may already have been removed.');
+          }
+        }
+
+        cancelBookingBtn && cancelBookingBtn.addEventListener('click', cancelBooking);
 
         // -------- localStorage autosave / load --------
         function saveDraft(){
@@ -289,7 +473,6 @@
               email: detailsEmail.value
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-            // kept console.log for debugging if you open DevTools
             console.log('Draft saved to localStorage:', draft);
           }catch(e){
             console.warn('Could not save draft', e);
@@ -313,13 +496,54 @@
             console.warn('Could not load draft', e);
           }
         }
+
+        // Clear everything helper
+        function clearAll(){
+          try{
+            // clear inputs
+            facilitySelect.value = '';
+            resDate.value = '';
+            resFrom.value = '';
+            resTo.value = '';
+            resPurpose.value = '';
+            detailsFullname.value = '';
+            detailsCourse.value = '';
+            detailsEmail.value = '';
+
+            // clear validate table content
+            const row = document.querySelector('#validate-table tbody tr');
+            row.querySelector('td[data-key="facility"]').textContent = '';
+            document.getElementById('validate-name').textContent = '';
+            document.getElementById('validate-email').textContent = '';
+            document.getElementById('validate-course').textContent = '';
+            document.getElementById('validate-datetime').textContent = '';
+            document.getElementById('validate-purpose').textContent = '';
+            document.getElementById('validate-status').textContent = '';
+
+            // remove draft
+            localStorage.removeItem(STORAGE_KEY);
+            console.log('Draft cleared from localStorage');
+          }catch(e){
+            console.warn('Error clearing form', e);
+          }
+        }
+
         // Save on input changes
-        [resDate,resFrom,resTo,resPurpose,detailsFullname,detailsCourse,detailsEmail].forEach(el=>{
-          el && el.addEventListener('input', saveDraft);
+        [facilitySelect,resDate,resFrom,resTo,resPurpose,detailsFullname,detailsCourse,detailsEmail].forEach(el=>{
+          el && el.addEventListener('input', ()=>{
+            // hide related errors when user types
+            hideError(errFacility);
+            hideError(errReservation);
+            hideError(errDetails);
+            saveDraft();
+          });
         });
 
-        // load draft at init
+        // load draft + preserved last reservation id at init
         loadDraft();
+        if(localStorage.getItem(LAST_RES_KEY)){
+          lastSavedReservationId = localStorage.getItem(LAST_RES_KEY);
+        }
 
         // init
         previewImg.style.display='none';
